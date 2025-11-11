@@ -30,7 +30,7 @@ userSchema.pre("save", async function (next) {
     if (!this.isModified("password")) return next();
     // isModified checks whether the password field is modified or not returning true or false next() means proceed to next middleware or save operation whch in this case is saving the user document
 
-    this.password = bcrypt.hash(this.password, 10)
+    this.password = await bcrypt.hash(this.password, 10)
     // 10 is the salt rounds i.e. number of times the hashing is applied to the password for security this.password contains the plain text password
     next();
 });
