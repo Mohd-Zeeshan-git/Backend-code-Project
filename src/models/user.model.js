@@ -1,4 +1,4 @@
-import bcrypt from "bcryptjs";
+import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
 import mongoose, { Schema } from "mongoose";
 const userSchema = new Schema({
@@ -17,6 +17,7 @@ const userSchema = new Schema({
 //     },
 //    subscribers: { type: [String], default: [] // Array of user IDs who are subscribed to this user
     //     },
+   
 watchhistory:{type:Schema.Types.ObjectId, ref:"video"},
     password: { type: String, required: true },
     refereshToken: { type: String },
@@ -55,4 +56,4 @@ userSchema.methods.generateRefreshToken = function () {
 userSchema.methods.isPasswordCorrect=async function (password) {
     return await bcrypt.compare(password, this.password);
 }
-export default User;
+export { User };
