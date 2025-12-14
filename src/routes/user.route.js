@@ -38,7 +38,8 @@
 
 
 import { Router } from "express";
-import { RegisterUser } from "../controllers/user.controller.js";
+import { loginUser, logOutUser, RefereshAccessToken, RegisterUser } from "../controllers/user.controller.js";
+import { verifyUser } from "../middlewares/auth.middleware.js";
 import { upload } from "../middlewares/multer.middleware.js";
 
 const router = Router();
@@ -73,5 +74,11 @@ router.post(
   // --- Step 4: Call your controller ---
   RegisterUser
 );
+
+router.route("/login").post(loginUser);
+
+//secured route
+router.route("/logout").post(verifyUser, logOutUser);
+router.route("/refresh-token").post(RefereshAccessToken); // handled in controller
 
 export default router;
