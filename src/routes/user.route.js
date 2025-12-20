@@ -80,5 +80,12 @@ router.route("/login").post(loginUser);
 //secured route
 router.route("/logout").post(verifyUser, logOutUser);
 router.route("/refresh-token").post(RefereshAccessToken); // handled in controller
+router.route("/change-password").post(verifyUser, changeCurrentPassword);
+router.route("/current-user").get(verifyUser, getCurrentUser);
+router.route("/update-account").patch(verifyUser, updateAccountDetails);
+router.route("/update-avatar").patch(verifyUser, upload.single("avatar"), updateUserAvatar);
+router.route("/update-coverimage").patch(verifyUser, upload.single("coverimage"), updateUserCoverImage);
+router.route("/channel/:username").get(verifyUser, getUserChannelProfile);
+router.route("/watch-history").get(verifyUser, getUserWatchHistory);
 
 export default router;
