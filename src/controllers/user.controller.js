@@ -442,8 +442,127 @@ const updateUserCoverImage = asyncHandler(async (req, res) => {
 
 });
 
+const getUserChannelProfile = asyncHandler(async (req, res) => {
+
+  const { username } = req.params;
+  if (!username) {
+    throw new ApiError(400, "Username is required");
+  }
+  const channel = await User.aggregate([
+    {
+      $match: {
+        username: username.toLowerCase()
+      }
+    },
+    {
+      $lookup: {
+        from: "subscriptions",
+        localField: "_id",
+        foreignField: "channel",
+        as: "subscribers"
+      }
+    },
+    {
+      $lookup: {
+        from: "subscriptions",
+        localField: "_id",
+        foreignField: "subscriber",
+        as: "subscribedTo"
+      }
+    },
+    {
+      $addFields: {
+        subscribersCount: {
+          $size: "$subscribers"
+        },
+        channelsSubscribedToCount: {
+          $size: "$subscribedTo"
+        },
+        isSubscribed: {
+          $cond: {
+            if: {
+              $in: [req.user?._id, "$subscribers.subscriber"]
+              // it checks if current user is in the list of subscribers of the channel
+            },
+            then: true,
+            else: false
+          }
+        }
+      }
+    },
+    {
+      $project: {
+        fullname: 1,
+        username: 1,
+        subscribersCount: 1,
+        channelsSubscribedToCount: 1,
+        isSubscribed: 1,
+        avatar: 1,
+        coverimage: 1,
+        createdAt: 1
+      }
+    }
+  ]);
+
+  if (!channel?.length //  herewe are checking if channel array is empty
+
+  ) {
+    throw new ApiError(404, "Channel not found");
+  }
+  console.log("Channel profile:", channel[0]); // since aggregate returns an array of results we are consoling first element which is an object
+  return res.status(200)
+    .json(new ApiResponse(200, "Channel profile fetched successfully", channel[0]));
+
+});
+ 
+const getUserWatchHistory = asyncHandler(async (req, res) => {
+  const user = await User.aggregate([
+    {
+      $match: {
+        _id: new mongoose.Types.ObjectId(req.user?._id)
+        // req.user?._id is a string we need to convert it to ObjectId
+      }
+    }, {
+      $lookup: {
+        from: "videos",
+        localField: "watchhistory",
+        foreignField: "_id",
+        as: "watchHistory",
+        pipeline: [{
+          $lookup: {
+            from:"users",
+            localField:"owner",
+            foreignField:"_id",
+            as: "owner",
+            pipeline: [{
+              $project: {
+                username:1,
+                fullname: 1,
+                avatar: 1
+              }
+            }]
+          }
+        }, {
+          $addFields: {
+            owner: {
+              $first: "$owner"
+              //use $ because it is field of current video document
+            }
+          }
+        }
+        ]
+      }
+    }
+  ]);
+
+  return res.status(200)
+    .json(new ApiResponse(200, "User watch history fetched successfully", user[0]?.watchHistory || []));
+});
+
 export {
   changeCurrentPassword,
-  getCurrentUser, loginUser, logOutUser, RefereshAccessToken, RegisterUser, updateAccountDetails, updateUserAvatar, updateUserCoverImage
+  getCurrentUser, getUserChannelProfile,
+  getUserWatchHistory, loginUser, logOutUser, RefereshAccessToken, RegisterUser,
+  updateAccountDetails, updateUserAvatar, updateUserCoverImage
 };
 

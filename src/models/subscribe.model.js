@@ -10,8 +10,8 @@ const subscriptionSchema = new schema({
         ref:"User"
     }
 
-},{timeStamps:true})
+},{timestamps:true})
 
-const subscription = mongoose.model("subscribe", subscriptionSchema);
+const subscription = mongoose.model("Subscription", subscriptionSchema);
 
 export default subscription;

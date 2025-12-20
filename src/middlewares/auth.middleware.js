@@ -2,7 +2,7 @@ import jwt from "jsonwebtoken";
 import { User } from "../models/user.model.js";
 import { ApiError } from "../utils/apiError.js";
 import { asyncHandler } from "../utils/asyncHandler.js";
-const verifyUser = asyncHandler(async (req, res, next) => { 
+const verifyUser = asyncHandler(async (req, res, next) => {
     try {
         const token = req.cookies?.accessToken || req.headers(authorization)?.replace("Bearer ", "");
         console.log("🔒 Verifying user authentication...");
@@ -18,7 +18,7 @@ const verifyUser = asyncHandler(async (req, res, next) => {
             // todo : discuss about frontend handling
             throw new ApiError(401, "User not found");
         }
-        req.user = user; 
+        req.user = user;
         console.log("✅ User authenticated:", user.username);
         next();
     } catch (error) {
